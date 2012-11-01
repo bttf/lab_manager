@@ -3,6 +3,7 @@ require 'soap/wsdlDriver'
 require 'soap/header/simplehandler'
 require 'soap/element'
 require 'xsd/datatypes'
+require 'yaml'
 
 require 'soap/netHttpClient'
 
@@ -44,7 +45,16 @@ end
 #
 class LabManager
 
+  @@configPath = File.expand_path("~/.lab_manager")
   @@url = nil
+
+  def self.configPath
+    @@configPath
+  end
+  def self.configPath=(value)
+    @@configPath = value
+  end
+
   def self.url
     @@url
   end
@@ -52,15 +62,19 @@ class LabManager
     @@url = value
   end
 
+  def self.reset
+    @@url = nil
+  end
+
   attr_accessor :workspace
 
   def initialize(organization, username, password, url = nil)
+    @@url = load_config(url)
     raise "Missing url" if @@url.nil?
 
     @organization = organization
     @username = username
     @password = password
-    @@url = url
   end
 
   #<GetConfigurationByName xmlns="http://vmware.com/labmanager">
@@ -146,6 +160,18 @@ class LabManager
     proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @username, @password)
 
     proxy
+  end
+
+  def load_config(url)
+    if (!@@url.nil?)
+      url = @@url
+    elsif (url.nil?)
+      if File.exists? @@configPath
+        config = YAML::load_file(@@configPath)
+        url = config["url"]
+      end
+    end
+    url
   end
 end
 

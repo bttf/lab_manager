@@ -1,24 +1,69 @@
 require 'spec_helper'
 require 'lab_manager'
 require 'flexmock'
+require 'tmpdir'
 
 describe LabManager do
 
-  context "no configuration" do
-    it "raises an error" do
-      expect {
+  before do
+    LabManager.reset
+  end
+
+  context "configuration" do
+
+    context "none" do
+      it "raises an error" do
+        expect {
+          LabManager.new("SOME ORG", "username", "password")
+        }.to raise_error
+      end
+    end
+
+    context "with file" do
+      before do
+        LabManager.configPath = "#{Dir.tmpdir}/configFile"
+        File.open(LabManager.configPath, "w+") do |fd|
+          fd.write("url: some_url:1234/path?parameters=values")
+        end
+      end
+
+      after do
+        File.delete(LabManager.configPath)
+      end
+
+      it "loads a config file" do
         LabManager.new("SOME ORG", "username", "password")
-      }.to raise_error
+
+        LabManager.url.should == "some_url:1234/path?parameters=values"
+      end
+    end
+
+    context "with constructor parameter" do
+      before do
+        LabManager.configPath = "INVALID FILE NAME"
+      end
+
+      it "sets url using constructor url" do
+        LabManager.new("SOME ORG", "username", "password", "A URL PARAMETER")
+
+        LabManager.url.should == "A URL PARAMETER"
+      end
+    end
+
+    context "with constant" do
+      before do
+        LabManager.url = "SOME URL"
+      end
+
+      it "allows construction with a url" do
+        LabManager.new("SOME ORG", "username", "password")
+      end
     end
   end
 
-  context "with configuration" do
+  context "configured" do
     before do
-      LabManager.url = "Some VALUE"
-    end
-
-    it "allows construction with a url" do
-      LabManager.new("SOME ORG", "username", "password")
+      LabManager.url = "SOME URL"
     end
 	
     context "present machine info to bash script" do
