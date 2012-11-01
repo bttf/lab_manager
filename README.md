@@ -11,7 +11,7 @@ Ruby >= 1.8.7
 Installation
 ------------
 ```
-gem install lab_manager
+gem install lab-manager
 ```
 
 Usage
