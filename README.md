@@ -10,15 +10,34 @@ Ruby >= 1.8.7
 
 Installation
 ------------
->  gem install lab_manager
+```
+gem install lab_manager
+```
 
 Usage
 -----
-Find out the names of machines in a configuratoin
+Find out the names of machines in a configuration
+
+Configure the Lab Manager server one of these ways:
 
 ```
+LabManager.url = "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"
+```
+
+With the constructor:
+```
+LabManager.new(organization, username, password, "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx")
+```
+
+Create a person configuration file:
+```
+echo 'url: "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"' > ~/.lab_manager
+```
+
+Retrieve a list of machines from a configuration:
+```
 lab = LabManager.new(organization, username, password)
-machines = lab.machines(configuration, :exclude => excludeMachines)
+machines = lab.machines(configuration, :exclude => ["machine1", "machine2"])
 puts "#{machines[0].name} #{machines[0].externalIp}"
 ```
 
@@ -36,3 +55,7 @@ intl a csv format.
 Machine.to_csv(machines)
 ```
 
+Release Notes
+=============
+1.0.1 - Add ability to configure server url in file.
+1.0.0 - Initial release
