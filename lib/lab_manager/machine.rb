@@ -25,7 +25,7 @@ class Machine
   end
   
   def to_csv
-          "#{name},#{internal_ip},#{external_ip}"
+    "#{name},#{internal_ip},#{external_ip}"
   end
 end
 
