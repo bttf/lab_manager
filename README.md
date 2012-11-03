@@ -6,7 +6,8 @@ interface.
 
 Requirements
 ------------
-Ruby >= 1.8.7
+* Ruby >= 1.8.7
+* Bundler
 
 Installation
 ------------
@@ -66,5 +67,6 @@ Machine.to_csv(machines)
 
 Release Notes
 =============
+1.0.2 - Refactor out monkey patch  and replace it with simple property assignment.
 1.0.1 - Add ability to configure server url in file.
 1.0.0 - Initial release
