@@ -5,6 +5,6 @@ RSpec.configure do |config|
   config.mock_with :flexmock
 
   # Filter out integration tests
-  config.filter_run_excluding :integration => true
+  config.filter_run_excluding :integration => true, :ruby18 => true, :ruby19 => true
 end
 

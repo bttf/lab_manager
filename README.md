@@ -6,12 +6,22 @@ interface.
 
 Requirements
 ------------
-Ruby >= 1.8.7
+* Ruby >= 1.8.7
+* Bundler
 
 Installation
 ------------
+To use the gem just install it.
 ```
-gem install lab_manager
+gem install lab-manager
+```
+To make changes just fork it, install the dependencies and test.
+```
+git clone https://github.com/IndependentPurchasingCooperative/lab_manager.git
+cd lab_manager
+gem install bundler
+bundle install
+rspec spec/lab_manager_spec.rb
 ```
 
 Usage
@@ -29,7 +39,7 @@ With the constructor:
 LabManager.new(organization, username, password, "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx")
 ```
 
-Create a person configuration file:
+Create a configuration file:
 ```
 echo 'url: "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"' > ~/.lab_manager
 ```
@@ -57,5 +67,7 @@ Machine.to_csv(machines)
 
 Release Notes
 =============
-1.0.1 - Add ability to configure server url in file.
-1.0.0 - Initial release
+* 1.0.2 - Refactor out monkey patch  and replace it with simple property assignment.
+* 1.0.1 - Add ability to configure server url in file.
+* 1.0.0 - Initial release
+
