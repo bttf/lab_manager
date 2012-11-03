@@ -10,8 +10,17 @@ Ruby >= 1.8.7
 
 Installation
 ------------
+To use the gem just install it.
 ```
 gem install lab-manager
+```
+To make changes just fork it, install the dependencies and test.
+```
+git clone https://github.com/IndependentPurchasingCooperative/lab_manager.git
+cd lab_manager
+gem install bundler
+bundle install
+rspec spec/lab_manager_spec.rb
 ```
 
 Usage
