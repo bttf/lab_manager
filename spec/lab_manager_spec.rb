@@ -61,6 +61,18 @@ describe LabManager do
     end
   end
 
+  context "" do
+    let(:client) {
+      LabManager.url = "http://soap.amazon.com/schemas2/AmazonWebServices.wsdl"
+      lab = LabManager.new("ORG", "USERNAME", "PASSWORD")
+      lab.send(:proxy).streamhandler.client
+    }
+
+    it "disables SSL certificate verification", :integration => true do
+      client.ssl_config.verify_mode.should == OpenSSL::SSL::VERIFY_NONE
+    end
+  end
+
   context "configured" do
     before do
       LabManager.url = "SOME URL"

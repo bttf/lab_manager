@@ -8,8 +8,6 @@ require 'yaml'
 
 require 'lab_manager/machine'
 
-require 'lab_manager/httpclient_patch'
-
 #
 # Lab Manager API
 #
@@ -133,7 +131,7 @@ class LabManager
     proxy.generate_explicit_type = false  # No datatype with request
     proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @username, @password)
 
-    #proxy.streamhandler.client.ssl_config.verify_mode = false
+    proxy.streamhandler.client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
     proxy
   end
