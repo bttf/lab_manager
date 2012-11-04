@@ -7,7 +7,7 @@
 # The 1.9.3 patch intercepts the existing constructor now that the class
 # name has changed.
 
-if RUBY_VERSION == "1.8.7"
+if Kernel.const_defined? :HTTPAccess2
   class HTTPAccess2::Client
     def initialize(*args)
       super(args[0], args[1])
@@ -15,7 +15,7 @@ if RUBY_VERSION == "1.8.7"
       #@session_manager.debug_dev = STDOUT
     end
   end
-else # > 1.8.7
+elsif Kernel.const_defined? :HTTPClient
   class HTTPClient
     alias_method :original_initialize, :initialize
     def initialize(*args)

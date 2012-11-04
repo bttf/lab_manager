@@ -67,6 +67,7 @@ Machine.to_csv(machines)
 
 Release Notes
 =============
+* 1.0.4 - Switch from version checking to verifying types exist for monkeypatch applicaation.
 * 1.0.3 - Revert back the monkey patch since the property setting didn't work.
 * 1.0.2 - Refactor out monkey patch  and replace it with simple property assignment.
 * 1.0.1 - Add ability to configure server url in file.
