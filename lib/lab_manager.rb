@@ -19,14 +19,11 @@ require 'lab_manager/httpclient_patch'
 #
 class LabManager
 
-  @@DEBUG = 0
+  @@DEBUG = false
 
   def self.DEBUG=(value)
     @@DEBUG = value
   end
-
-  @@configPath = File.expand_path("~/.lab_manager")
-  @@url = nil
 
   def self.configPath
     @@configPath
@@ -41,20 +38,31 @@ class LabManager
   def self.url=(value)
     @@url = value
   end
+  def self.username
+    @@username
+  end
+  def self.password
+    @@password
+  end
 
   def self.reset
+    @@configPath = File.expand_path("~/.lab_manager")
+
     @@url = nil
+    @@username = nil
+    @@password = nil
   end
+  reset
 
   attr_accessor :workspace
 
-  def initialize(organization, username, password, url = nil)
-    @@url = load_config(url)
+  def initialize(organization, username = nil, password = nil, url = nil)
+    load_config(url, username, password)
     raise "Missing url" if @@url.nil?
+    raise "Missing username" if @@username.nil?
+    raise "Missing password" if @@password.nil?
 
     @organization = organization
-    @username = username
-    @password = password
   end
 
   #<GetConfigurationByName xmlns="http://vmware.com/labmanager">
@@ -135,25 +143,26 @@ class LabManager
   def proxy
     factory = SOAP::WSDLDriverFactory.new("#{@@url}?WSDL")
     proxy = factory.create_rpc_driver
-    proxy.wiredump_dev = STDOUT if DEBUG
+    proxy.wiredump_dev = STDOUT if @@DEBUG
     proxy.generate_explicit_type = false  # No datatype with request
-    proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @username, @password)
+    proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @@username, @@password)
 
     #proxy.streamhandler.client.ssl_config.verify_mode = false
 
     proxy
   end
 
-  def load_config(url)
-    if (!@@url.nil?)
-      url = @@url
-    elsif (url.nil?)
-      if File.exists? @@configPath
-        config = YAML::load_file(@@configPath)
-        url = config["url"]
-      end
+  def load_config(url, username, password)
+    if File.exists? @@configPath
+      config = YAML::load_file(@@configPath)
+      @@url = config["url"]
+      @@username = config["username"]
+      @@password = config["password"]
     end
-    url
+    
+    @@url = url if !url.nil?
+    @@username = username if !username.nil?
+    @@password = password if !password.nil?
   end
 end
 

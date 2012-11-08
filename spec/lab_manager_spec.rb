@@ -13,6 +13,7 @@ describe LabManager do
 
     context "none" do
       it "raises an error" do
+        LabManager.configPath = "INVALID FILE"
         expect {
           LabManager.new("SOME ORG", "username", "password")
         }.to raise_error
@@ -23,7 +24,9 @@ describe LabManager do
       before do
         LabManager.configPath = "#{Dir.tmpdir}/configFile"
         File.open(LabManager.configPath, "w+") do |fd|
-          fd.write("url: some_url:1234/path?parameters=values")
+          fd.write("url: some_url:1234/path?parameters=values\n")
+          fd.write("username: conf_username\n")
+          fd.write("password: conf_password\n")
         end
       end
 
@@ -32,9 +35,19 @@ describe LabManager do
       end
 
       it "loads a config file" do
-        LabManager.new("SOME ORG", "username", "password")
+        LabManager.new("SOME ORG")
 
         LabManager.url.should == "some_url:1234/path?parameters=values"
+        LabManager.username.should == "conf_username"
+        LabManager.password.should == "conf_password"
+      end
+
+      it "loads a config file and overrides username and password" do
+        LabManager.new("SOME ORG", "arg_username", "arg_password", "arg_url")
+
+        LabManager.url.should == "arg_url"
+        LabManager.username.should == "arg_username"
+        LabManager.password.should == "arg_password"
       end
     end
 
