@@ -67,6 +67,7 @@ Machine.to_csv(machines)
 
 Release Notes
 =============
+* 1.0.6 - Fix problem with loading configurations with a single machine in it.
 * 1.0.5 - Switch from Kernel.const_defined? to Object.const_defined? for 1.8.7 compatability.
 * 1.0.4 - Switch from version checking to verifying types exist for monkeypatch applicaation.
 * 1.0.3 - Revert back the monkey patch since the property setting didn't work.
