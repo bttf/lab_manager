@@ -19,7 +19,7 @@ require 'lab_manager/httpclient_patch'
 #
 class LabManager
 
-  @@DEBUG = false
+  @@DEBUG = true
 
   def self.DEBUG=(value)
     @@DEBUG = value
@@ -91,6 +91,10 @@ class LabManager
     proxy.GetConfigurationByName(:name => name)
   end
 
+  def configurations()
+    proxy.ListConfigurations(:configurationType => 2)
+  end
+
   #  <ListMachines xmlns="http://vmware.com/labmanager">
   #    <configurationId>int</configurationId>
   #  </ListMachines>
@@ -137,6 +141,20 @@ class LabManager
     machines(configurationName).find { |machine|
       machine.name == machineName
     }
+  end
+
+  #
+  #  <ConfigurationClone xmlns="http://vmware.com/labmanager">
+  #     <configurationId>int</configurationId>
+  #     <newWorkspaceName>string</newWorkspaceName>
+  #  </ConfigurationClone>
+  def clone(configurationName, newWorkspaceName)
+    configuration = proxy.GetConfigurationByName(:name => configurationName)
+    configurationId = configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
+
+    data = proxy.ConfigurationClone(:configurationId => configurationId, :newWorkspaceName => newWorkspaceName)
+
+    puts ">>>> #{File.basename(__FILE__)}:#{__LINE__}, #{data}"
   end
 
   private
