@@ -5,9 +5,14 @@ class Machine
     return [] if data["ListMachinesResult"].nil?
     return [] if data["ListMachinesResult"]["Machine"].nil?
 
-    data["ListMachinesResult"]["Machine"].collect { |machine| 
-      Machine.new(machine)
-    }
+    machine_list = data["ListMachinesResult"]["Machine"]
+    if (machine_list.is_a? Array)
+      machine_list.collect { |machine| 
+        Machine.new(machine)
+      }
+    else
+      [Machine.new(machine_list)]
+    end
   end
 
   def self.to_csv(machines)

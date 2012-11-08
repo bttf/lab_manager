@@ -109,6 +109,27 @@ describe LabManager do
         }
       }
 
+      context "when there is only one macine" do
+
+        let(:machineData) {
+          {
+            "ListMachinesResult" => {
+              "Machine" => [ 
+                  {"name" => "MACHINE1", "internalIP" => "1.1.1.1", "externalIP" => "2.2.2.2" },
+              ]
+            }
+          }
+        }
+
+        it "returns the machine name and internal ip address" do
+          machines = mockLab.machines("some configuration")
+
+          machines[0].name.should == "MACHINE1"
+          machines[0].internal_ip.should == "1.1.1.1"
+          machines[0].external_ip.should == "2.2.2.2"
+        end
+      end
+
       context "when there are machines" do
 
         let(:machineData) {
