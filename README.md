@@ -32,6 +32,7 @@ Configure the Lab Manager server one of these ways:
 
 ```
 LabManager.url = "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"
+LabManager.new(organization, username, password)
 ```
 
 With the constructor:
@@ -41,12 +42,21 @@ LabManager.new(organization, username, password, "https://YOUR_DOMAIN/LabManager
 
 Create a configuration file:
 ```
-echo 'url: "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"' > ~/.lab_manager
+cat > ~/.lab_manager << _EOF_
+url: "https://YOUR_DOMAIN/LabManager/SOAP/LabManager.asmx"'
+username: USERNAME
+password: PASSWORD
+_EOF_
+```
+
+You can ask Lab Manager or a list of machines using an included command:
+```
+lab_machines.sh <ORG> <WORKSPACE> <CONFIGUIRATION>
 ```
 
 Retrieve a list of machines from a configuration:
 ```
-lab = LabManager.new(organization, username, password)
+lab = LabManager.new(organization)
 machines = lab.machines(configuration, :exclude => ["machine1", "machine2"])
 puts "#{machines[0].name} #{machines[0].externalIp}"
 ```
