@@ -1,6 +1,6 @@
 class Machine
 
-  def self.fromList(data)
+  def self.from_list(data)
     return [] if data.nil?
     return [] if data["ListMachinesResult"].nil?
     return [] if data["ListMachinesResult"]["Machine"].nil?

@@ -16,7 +16,7 @@ describe Machine do
         }
       }
 
-      machines = Machine.fromList(data)
+      machines = Machine.from_list(data)
 
       machines.size().should == 2
       machines[0].name.should == "machine1"
@@ -35,7 +35,7 @@ describe Machine do
         }
       }
 
-      machines = Machine.fromList(data)
+      machines = Machine.from_list(data)
 
       machines.size().should == 1
       machines[0].name.should == "machine1"

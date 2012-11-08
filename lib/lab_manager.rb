@@ -108,45 +108,18 @@ class LabManager
   #   lab_manager.machines("CONFIG NAME")
   #   lab_manager.machines("CONFIG NAME", :exclude => ["machine name"])
   #
-
-
-
-  #  <ListMachinesResponse xmlns="http://vmware.com/labmanager">
-  #    <ListMachinesResult>
-  #      <Machine>
-  #        <id>5187</id>
-  #        <name>A</name>
-  #        <description />
-  #        <internalIP>10.21.220.203</internalIP>
-  #        <externalIP>10.21.220.61</externalIP>
-  #        <macAddress>00:50:56:34:08:4e</macAddress>
-  #        <memory>3072</memory>
-  #        <status>2</status>
-  #        <isDeployed>true</isDeployed>
-  #        <configID>1021</configID>
-  #        <DatastoreNameResidesOn>S1_15KDISK04_LAB01</DatastoreNameResidesOn>
-  #        <HostNameDeployedOn>ipcmia-napvh07.mustard.ipcoop.com</HostNameDeployedOn>
-  #        <OwnerFullName>Yassel Piloto</OwnerFullName>
-  #      </Machine>
-  #    </ListMachinesResult>
-  #  </ListMachinesResponse>
-
-
-
-
   def machines(configurationName, options = {})
     configuration = proxy.GetConfigurationByName(:name => configurationName)
     configurationId = configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
 
     data = proxy.ListMachines(:configurationId => configurationId)
 
-    machines = Machine.fromList(data)
+    machines = Machine.from_list(data)
 
     if (!options[:exclude].nil?)
       machines = machines.find_all { |machine| 
         !options[:exclude].include?(machine.name)
       } 
-      puts ">>>> #{File.basename(__FILE__)}:#{__LINE__}, #{machines}"
     end
 
     machines
