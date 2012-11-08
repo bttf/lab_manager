@@ -1,6 +1,10 @@
 require 'rake'
 require 'rspec/core/rake_task'
 
+require 'rake/clean'
+
+CLEAN = FileList['*.gem']
+
 namespace :test do
   #
   # RSpec unit tests are those tests not marked with the
@@ -23,4 +27,6 @@ namespace :test do
 end
 
 task :default => 'test:unit'
+
+
 
