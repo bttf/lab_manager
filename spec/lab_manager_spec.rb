@@ -115,36 +115,36 @@ describe LabManager do
     let(:lab) { LabManager.new("SOME ORG", "username", "password") }
 	
     context "retrieves configuration by name" do
-      let(:mockLab) {
-        mockProxy = flexmock("proxy")
-        mockProxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
 
-        mockLab = flexmock(lab)
-        mockLab.should_receive(:proxy).and_return(mockProxy)
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
 
-        mockLab
+        mock_lab
       }
 
       it "with a configuration name" do
-        config = mockLab.configuration("CONFIG NAME")
+        config = mock_lab.configuration("CONFIG NAME")
 
         config.should_not be_nil
       end
     end
 
     context "retrieves configuration by id" do
-      let(:mockLab) {
-        mockProxy = flexmock("proxy")
-        mockProxy.should_receive(:GetConfiguration).and_return(configurationData)
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfiguration).and_return(configurationData)
 
-        mockLab = flexmock(lab)
-        mockLab.should_receive(:proxy).and_return(mockProxy)
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
 
-        mockLab
+        mock_lab
       }
 
       it "with a configuration id" do
-        config = mockLab.configuration("12345")
+        config = mock_lab.configuration("12345")
 
         config.should_not be_nil
       end
@@ -152,15 +152,15 @@ describe LabManager do
 
     context "converts machine raw data to data structure" do
 
-      let(:mockLab) {
-        mockProxy = flexmock("proxy")
-        mockProxy.should_receive(:GetConfigurationByName).and_return(configurationData)
-        mockProxy.should_receive(:ListMachines).and_return(machineData)
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:ListMachines).and_return(machineData)
 
-        mockLab = flexmock(lab)
-        mockLab.should_receive(:proxy).and_return(mockProxy)
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
 
-        mockLab
+        mock_lab
       }
 
       context "when there is only one macine" do
@@ -176,7 +176,7 @@ describe LabManager do
         }
 
         it "returns the machine name and internal ip address" do
-          machines = mockLab.machines("some configuration")
+          machines = mock_lab.machines("some configuration")
 
           machines[0].name.should == "MACHINE1"
           machines[0].internal_ip.should == "1.1.1.1"
@@ -198,7 +198,7 @@ describe LabManager do
         }
 
         it "returns a machine name and internal ip address" do
-          machines = mockLab.machines("some configuration")
+          machines = mock_lab.machines("some configuration")
 
           machines[0].name.should == "MACHINE1"
           machines[0].internal_ip.should == "1.1.1.1"
@@ -210,7 +210,7 @@ describe LabManager do
         end
 
         it "returns machines excluding specific machines" do
-          machines = mockLab.machines("some configuration", :exclude => ["MACHINE1"])
+          machines = mock_lab.machines("some configuration", :exclude => ["MACHINE1"])
 
           machines.size.should == 1
 
@@ -220,19 +220,19 @@ describe LabManager do
         end
 
         it "returns empty array if all machines are excluded" do
-          machines = mockLab.machines("some configuration", :exclude => ["MACHINE1", "MACHINE2"])
+          machines = mock_lab.machines("some configuration", :exclude => ["MACHINE1", "MACHINE2"])
 
           machines.should == []
         end
 
         it "returns all machines if the excluded macine does not exist" do
-          machines = mockLab.machines("some configuration", :exclude => ["MISSING MACHINE"])
+          machines = mock_lab.machines("some configuration", :exclude => ["MISSING MACHINE"])
 
           machines.size == 2
         end
 
         it "returns a single machine configuration that matches the name" do
-          machine = mockLab.machine("some configuration", "MACHINE1")
+          machine = mock_lab.machine("some configuration", "MACHINE1")
 
           machine.name.should == "MACHINE1"
           machine.internal_ip.should == "1.1.1.1"
@@ -240,12 +240,12 @@ describe LabManager do
         end
 
         it "returns nil of the machine requested is not found" do
-          mockLab.machine("some confuguration", "MISSING MACHINE").should be_nil
+          mock_lab.machine("some confuguration", "MISSING MACHINE").should be_nil
         end
 
         it "returns nil if nil was passed in" do
-          mockLab.machine("some confuguration", nil).should be_nil
-          mockLab.machine(nil, nil).should be_nil
+          mock_lab.machine("some confuguration", nil).should be_nil
+          mock_lab.machine(nil, nil).should be_nil
         end
       end
 
@@ -260,40 +260,77 @@ describe LabManager do
         }
 
         it "returns an empty array if there are no machines" do
-          mockLab.machines("some confogiiuration").should == []
+          mock_lab.machines("some confogiiuration").should == []
         end
 
         it "returns an empty array if te argymet is nil" do
-          mockProxy = flexmock("proxy")
-          mockProxy.should_receive(:GetConfigurationByName).and_return(configurationData)
-          mockProxy.should_receive(:ListMachines).and_return(nil)
+          mock_proxy = flexmock("proxy")
+          mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+          mock_proxy.should_receive(:ListMachines).and_return(nil)
 
-          mockLab = flexmock(lab)
-          mockLab.should_receive(:proxy).and_return(mockProxy)
+          mock_lab = flexmock(lab)
+          mock_lab.should_receive(:proxy).and_return(mock_proxy)
 
-          mockLab.machines("some conf").should == []
+          mock_lab.machines("some conf").should == []
         end
 
         it "returns an empty array if the result is nil" do
           machineData["ListMachinesResult"] = nil
 
-          mockLab.machines("some cofn").should == []
+          mock_lab.machines("some cofn").should == []
         end
 
         it "returns a machine that is nil" do
           machineData["ListMachinesResult"]["Machine"] = nil
 
-          mockLab.machines("some cofn").should == []
+          mock_lab.machines("some cofn").should == []
         end
       end
     end
 
     context "clones" do
-      it "retrurns the new configuration id"
+
+      let(:clone_data) {
+          {
+            "ConfigurationCloneResult" => "12345"
+          }
+      }
+
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:ConfigurationClone).and_return(clone_data)
+
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+        mock_lab
+      }
+
+      it "retrurns the new configuration id" do
+        conf_id = mock_lab.clone("SOME CONFIG", "NEW CONFIG")
+
+        conf_id.should == "12345"
+      end
     end
 
     context "delete" do
-      it "returns nil for success"
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:ConfigurationDelete).and_return(nil)
+
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+        mock_lab
+      }
+
+      it "returns nil for success" do
+        result = mock_lab.delete("SOME CONFIG")
+
+        result.should be_nil
+      end
     end
   end
 
