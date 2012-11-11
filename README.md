@@ -59,6 +59,7 @@ lab_delete.sh <ORG> <WORKSPACE> <CONFIGUIRATION>
 
 Retrieve a list of machines from a configuration:
 ```
+require 'lab_manager'
 lab = LabManager.new(organization)
 machines = lab.machines(configuration, :exclude => ["machine1", "machine2"])
 puts "#{machines[0].name} #{machines[0].externalIp}"
@@ -75,7 +76,7 @@ need to specify the current workspace to target the creation.
 ```
 lab.workspace = "NEW CONFIGURATION WORKSPACE"
 lab.clone "EXISTING CONFIGIRATION", "NEW CONFIGIRATION"
-
+```
 or
 ```
 lab.workspace = "NEW CONFIGURATION WORKSPACE"
