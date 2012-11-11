@@ -65,36 +65,52 @@ class LabManager
     @organization = organization
   end
 
-  #<GetConfigurationByName xmlns="http://vmware.com/labmanager">
-  #  <name>string</name>
-  #</GetConfigurationByName>
+  # Retrieve configuration information
   #
-  #<GetConfigurationByNameResponse xmlns="http://vmware.com/labmanager">
-  #  <GetConfigurationByNameResult>
-  #    <Configuration>
-  #      <id>int</id>
-  #      <name>string</name>
-  #      <description>string</description>
-  #      <isPublic>boolean</isPublic>
-  #      <isDeployed>boolean</isDeployed>
-  #      <fenceMode>int</fenceMode>
-  #      <type>int</type>
-  #      <owner>string</owner>
-  #      <dateCreated>dateTime</dateCreated>
-  #      <autoDeleteInMilliSeconds>double</autoDeleteInMilliSeconds>
-  #      <bucketName>string</bucketName>
-  #      <mustBeFenced>NotSpecified or True or False</mustBeFenced>
-  #      <autoDeleteDateTime>dateTime</autoDeleteDateTime>
-  #    </Configuration>
+  # ==== XML Sample
   #
-  def configuration(name)
-    proxy.GetConfigurationByName(:name => name)
+  # <GetConfigurationByName xmlns="http://vmware.com/labmanager">
+  #   <name>string</name>
+  # </GetConfigurationByName>
+  #
+  # <GetConfigurationByNameResponse xmlns="http://vmware.com/labmanager">
+  #   <GetConfigurationByNameResult>
+  #     <Configuration>
+  #       <id>int</id>
+  #       <name>string</name>
+  #       <description>string</description>
+  #       <isPublic>boolean</isPublic>
+  #       <isDeployed>boolean</isDeployed>
+  #       <fenceMode>int</fenceMode>
+  #       <type>int</type>
+  #       <owner>string</owner>
+  #       <dateCreated>dateTime</dateCreated>
+  #       <autoDeleteInMilliSeconds>double</autoDeleteInMilliSeconds>
+  #       <bucketName>string</bucketName>
+  #       <mustBeFenced>NotSpecified or True or False</mustBeFenced>
+  #       <autoDeleteDateTime>dateTime</autoDeleteDateTime>
+  #     </Configuration>
+  # 
+  # * name_or_id can be a configuration name or a configuration id returned
+  # by another method. An id is identified as only digits.
+  #
+  def configuration(name_or_id)
+    if name_or_id =~ /^\d+$/
+      proxy.GetConfiguration(:configurationId => name_or_id)
+    else
+      proxy.GetConfigurationByName(:name => name_or_id)
+    end
   end
 
+  # Retrieve a list of configuration information
   def configurations()
     proxy.ListConfigurations(:configurationType => 2)
   end
 
+  #  Retrieve a list of machines in a configuration
+  #
+  # ==== XML Sample
+  #
   #  <ListMachines xmlns="http://vmware.com/labmanager">
   #    <configurationId>int</configurationId>
   #  </ListMachines>
@@ -116,13 +132,16 @@ class LabManager
   #        <HostNameDeployedOn>string</HostNameDeployedOn>
   #        <OwnerFullName>string</OwnerFullName>
   #      </Machine>
+  # 
+  # * configuration_name
+  #
+  # ==== Examples
   #
   #   lab_manager.machines("CONFIG NAME")
   #   lab_manager.machines("CONFIG NAME", :exclude => ["machine name"])
   #
-  def machines(configurationName, options = {})
-    configuration = proxy.GetConfigurationByName(:name => configurationName)
-    configurationId = configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
+  def machines(configuration_name, options = {})
+    configurationId = configurationId(configuration_name)
 
     data = proxy.ListMachines(:configurationId => configurationId)
 
@@ -137,29 +156,68 @@ class LabManager
     machines
   end
 
-  def machine(configurationName, machineName)
-    machines(configurationName).find { |machine|
+  # Retrieve the informaiton for a single machine in a configuration
+  def machine(configuration_name, machineName)
+    machines(configuration_name).find { |machine|
       machine.name == machineName
     }
   end
 
+  # Clone a configuration to a new name
+  #
+  # ==== XML Sample
   #
   #  <ConfigurationClone xmlns="http://vmware.com/labmanager">
   #     <configurationId>int</configurationId>
   #     <newWorkspaceName>string</newWorkspaceName>
   #  </ConfigurationClone>
-  def clone(configurationName, newWorkspaceName)
-    configuration = proxy.GetConfigurationByName(:name => configurationName)
-    configurationId = configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
+  #
+  #  <ConfigurationCloneResponse xmlns="http://vmware.com/labmanager">
+  #      <ConfigurationCloneResult>1150</ConfigurationCloneResult>
+  #  </ConfigurationCloneResponse>
+  #
+  # * configuration_name to clone
+  # * new_configuration_name to clone to
+  #
+  # returns the id of the cloned configuration.
+  #
+  def clone(configuration_name, new_configuration_name)
+    configurationId = configurationId(configuration_name)
 
-    data = proxy.ConfigurationClone(:configurationId => configurationId, :newWorkspaceName => newWorkspaceName)
+    data = proxy.ConfigurationClone(
+              :configurationId => configurationId, 
+              :newWorkspaceName => new_configuration_name)
+    data["ConfigurationCloneResult"]
+  end
 
-    puts ">>>> #{File.basename(__FILE__)}:#{__LINE__}, #{data}"
+  # Delete a configuration
+  #
+  # ==== XML Sample
+  #
+  #  <ConfigurationDelete xmlns="http://vmware.com/labmanager">
+  #     <configurationId>int</configurationId>
+  #  </ConfigurationDelete>
+  #
+  #  <ConfigurationDeleteResponse xmlns="http://vmware.com/labmanager" />
+  #
+  # * configuration_name to be deleted
+  #
+  # raises SOAP:FaultError. See e.faulstring or e.detail
+  #
+  def delete(configuration_name)
+    configurationId = configurationId(configuration_name)
+
+    proxy.ConfigurationDelete(:configurationId => configurationId)
   end
 
   private
   def self.config
     YAML::load_file(@@configPath)
+  end
+
+  def configurationId(configuration_name)
+    configuration = proxy.GetConfigurationByName(:name => configuration_name)
+    configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
   end
 
   def proxy
@@ -169,7 +227,8 @@ class LabManager
     proxy.generate_explicit_type = false  # No datatype with request
     proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @@username, @@password)
 
-    proxy.streamhandler.client.receive_timeout = 100
+    # The lab manager clone request can take a long time.
+    proxy.streamhandler.client.receive_timeout = 10 * 60 # 10 minutes
 
     #proxy.streamhandler.client.ssl_config.verify_mode = false
 
