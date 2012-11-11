@@ -18,7 +18,7 @@ describe LabManager do
         LabManager.configPath = "INVALID FILE"
         expect {
           LabManager.new("SOME ORG", "username", "password")
-        }.to raise_error
+        }.to raise_error "Missing url"
       end
     end
 
@@ -371,7 +371,25 @@ describe LabManager do
         end
       end
 
-      context "deployed" do
+      context "deployed but not force flag" do
+        let(:mock_lab) {
+          mock_proxy = flexmock("proxy")
+          mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+
+          mock_lab = flexmock(lab)
+          mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+          mock_lab
+        }
+
+        it "undeploy fails if the force flag is not set" do
+          expect {
+            mock_lab.delete("SOME CONFIG")
+          }.to raise_error SOAP::FaultError
+        end
+      end
+      
+      context "deployed with force flag" do
         let(:mock_lab) {
           mock_proxy = flexmock("proxy")
           mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
@@ -385,7 +403,7 @@ describe LabManager do
         }
 
         it "undeploys first" do
-          result = mock_lab.delete("SOME CONFIG")
+          result = mock_lab.delete("SOME CONFIG", :force => true)
 
           result.should be_nil
         end

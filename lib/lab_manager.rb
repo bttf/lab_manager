@@ -5,6 +5,7 @@ require 'soap/element'
 require 'soap/netHttpClient'
 require 'xsd/datatypes'
 require 'yaml'
+require 'ostruct'
 
 require 'lab_manager/machine'
 require 'lab_manager/configuration'
@@ -239,12 +240,17 @@ class LabManager
   #
   # * configuration_name to be deleted
   #
-  # raises SOAP:FaultError. See e.faulstring or e.detail
+  # raises SOAP:FaultError. See e.faultstring or e.detail
   #
-  def delete(configuration_name)
+  def delete(configuration_name, options = {})
     config = configuration(configuration_name)
 
     if (config.deployed)
+      fault = OpenStruct.new(
+          :faultstring => "Can not delete configuration that is deployed",
+          :detail => "Must use force flag to auto-undeploy.")
+      raise SOAP::FaultError.new(fault) unless options[:force]
+
       proxy.ConfigurationUndeploy(:configurationId => config.id)
     end
 
