@@ -104,7 +104,7 @@ describe LabManager do
       end
     end
 
-    let(:configurationData) {
+    let(:configuration_data) {
       {
         "GetConfigurationByNameResult" =>  {
           "Configuration" => { "id" => "configurationId"}
@@ -117,7 +117,7 @@ describe LabManager do
     context "retrieves configuration by name" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -135,7 +135,7 @@ describe LabManager do
     context "retrieves configuration by id" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfiguration).and_return(configurationData)
+        mock_proxy.should_receive(:GetConfiguration).and_return(configuration_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -154,7 +154,7 @@ describe LabManager do
 
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
         mock_proxy.should_receive(:ListMachines).and_return(machineData)
 
         mock_lab = flexmock(lab)
@@ -265,7 +265,7 @@ describe LabManager do
 
         it "returns an empty array if te argymet is nil" do
           mock_proxy = flexmock("proxy")
-          mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+          mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
           mock_proxy.should_receive(:ListMachines).and_return(nil)
 
           mock_lab = flexmock(lab)
@@ -291,14 +291,12 @@ describe LabManager do
     context "clones" do
 
       let(:clone_data) {
-          {
-            "ConfigurationCloneResult" => "12345"
-          }
+        { "ConfigurationCloneResult" => "12345" }
       }
 
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
         mock_proxy.should_receive(:ConfigurationClone).and_return(clone_data)
 
         mock_lab = flexmock(lab)
@@ -317,7 +315,7 @@ describe LabManager do
     context "delete" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configurationData)
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
         mock_proxy.should_receive(:ConfigurationDelete).and_return(nil)
 
         mock_lab = flexmock(lab)
@@ -330,6 +328,29 @@ describe LabManager do
         result = mock_lab.delete("SOME CONFIG")
 
         result.should be_nil
+      end
+    end
+
+    context "checkout" do
+      let(:checkout_data) {
+        { "ConfigurationCheckoutResult" => "54321" }
+      }
+
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
+        mock_proxy.should_receive(:ConfigurationCheckout).and_return(checkout_data)
+
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+        mock_lab
+      }
+
+      it "returns nil for success" do
+        configuration_id = mock_lab.checkout("SOME CONFIG", "NEW CONFIG")
+
+        configuration_id.should == "54321"
       end
     end
   end

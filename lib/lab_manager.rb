@@ -163,6 +163,29 @@ class LabManager
     }
   end
 
+  # Clones a configuration from a library.
+  #
+  # ==== XML Samples
+  #
+  #   <ConfigurationCheckout xmlns:n1="http://vmware.com/labmanager">
+  #     <configurationId>1138</configurationId>
+  #     <workspaceName>NEW TEST CONFIG</workspaceName>
+  #   </ConfigurationCheckout>
+  #
+  # * configuration_name to clone from the library
+  # * new_configuration_name to clone to
+  #
+  # return the new configuration id
+  #
+  def checkout(configuration_name, new_configuration_name)
+    configurationId = configurationId(configuration_name)
+
+    data = proxy.ConfigurationCheckout(
+              :configurationId => configurationId,
+              :workspaceName => new_configuration_name)
+    data["ConfigurationCheckoutResult"]
+  end
+
   # Clone a configuration to a new name
   #
   # ==== XML Sample
@@ -227,8 +250,8 @@ class LabManager
     proxy.generate_explicit_type = false  # No datatype with request
     proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @@username, @@password)
 
-    # The lab manager clone request can take a long time.
-    proxy.streamhandler.client.receive_timeout = 10 * 60 # 10 minutes
+    # The lab manager clone and checkout requests can take a long time.
+    proxy.streamhandler.client.receive_timeout = 15 * 60 # seconds
 
     #proxy.streamhandler.client.ssl_config.verify_mode = false
 
