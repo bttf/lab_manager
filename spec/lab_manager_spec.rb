@@ -107,7 +107,19 @@ describe LabManager do
     let(:configuration_data) {
       {
         "GetConfigurationByNameResult" =>  {
-          "Configuration" => { "id" => "configurationId"}
+          "Configuration" => { 
+            "id" => "configurationId",
+            "name" => "config name",
+            "isDeployed" => "true",
+            "isPublic" => "true",
+            "description" => "A Nice configuration",
+            "fenceMode" => "true",
+            "mustBeFenced" => "NotSpecified",
+            "type" => "2",
+            "dateCreated" => "2012-11-07T14:24:29.01",
+            "autoDeleteInMilliSeconds" => "0",
+            "autoDeleteDateTime" => "9999-12-31T23:59:59.9999999",
+          }
         }
       }
     }
@@ -117,7 +129,7 @@ describe LabManager do
     context "retrieves configuration by name" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
+        mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -129,13 +141,15 @@ describe LabManager do
         config = mock_lab.configuration("CONFIG NAME")
 
         config.should_not be_nil
+        config.id.should == "configurationId"
+        config.deployed.should be_true
       end
     end
 
     context "retrieves configuration by id" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfiguration).and_return(configuration_data)
+        mock_proxy.should_receive(:GetConfiguration).once.and_return(configuration_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -147,6 +161,8 @@ describe LabManager do
         config = mock_lab.configuration("12345")
 
         config.should_not be_nil
+        config.id.should == "configurationId"
+        config.deployed.should be_true
       end
     end
 
@@ -265,8 +281,8 @@ describe LabManager do
 
         it "returns an empty array if te argymet is nil" do
           mock_proxy = flexmock("proxy")
-          mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
-          mock_proxy.should_receive(:ListMachines).and_return(nil)
+          mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+          mock_proxy.should_receive(:ListMachines).once.and_return(nil)
 
           mock_lab = flexmock(lab)
           mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -296,8 +312,8 @@ describe LabManager do
 
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
-        mock_proxy.should_receive(:ConfigurationClone).and_return(clone_data)
+        mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+        mock_proxy.should_receive(:ConfigurationClone).once.and_return(clone_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -312,11 +328,11 @@ describe LabManager do
       end
     end
 
-    context "delete" do
+    context "undeploy" do
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
-        mock_proxy.should_receive(:ConfigurationDelete).and_return(nil)
+        mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+        mock_proxy.should_receive(:ConfigurationUndeploy).once.and_return(nil)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -324,10 +340,55 @@ describe LabManager do
         mock_lab
       }
 
-      it "returns nil for success" do
-        result = mock_lab.delete("SOME CONFIG")
+      it "undeploys a configuration" do
+        result = mock_lab.undeploy("SOME CONFIG")
 
         result.should be_nil
+      end
+    end
+
+    context "delete" do
+
+      context "undeployed" do
+        let(:mock_lab) {
+          config = configuration_data
+          config["GetConfigurationByNameResult"]["Configuration"]["isDeployed"] = "false"
+
+          mock_proxy = flexmock("proxy")
+          mock_proxy.should_receive(:GetConfigurationByName).once.and_return(config)
+          mock_proxy.should_receive(:ConfigurationDelete).once.and_return(nil)
+
+          mock_lab = flexmock(lab)
+          mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+          mock_lab
+        }
+
+        it "returns nil for success" do
+          result = mock_lab.delete("SOME CONFIG")
+
+          result.should be_nil
+        end
+      end
+
+      context "deployed" do
+        let(:mock_lab) {
+          mock_proxy = flexmock("proxy")
+          mock_proxy.should_receive(:GetConfigurationByName).twice.and_return(configuration_data)
+          mock_proxy.should_receive(:ConfigurationUndeploy).once.and_return(nil)
+          mock_proxy.should_receive(:ConfigurationDelete).once.and_return(nil)
+
+          mock_lab = flexmock(lab)
+          mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+          mock_lab
+        }
+
+        it "undeploys first" do
+          result = mock_lab.delete("SOME CONFIG")
+
+          result.should be_nil
+        end
       end
     end
 
@@ -338,8 +399,8 @@ describe LabManager do
 
       let(:mock_lab) {
         mock_proxy = flexmock("proxy")
-        mock_proxy.should_receive(:GetConfigurationByName).and_return(configuration_data)
-        mock_proxy.should_receive(:ConfigurationCheckout).and_return(checkout_data)
+        mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+        mock_proxy.should_receive(:ConfigurationCheckout).once.and_return(checkout_data)
 
         mock_lab = flexmock(lab)
         mock_lab.should_receive(:proxy).and_return(mock_proxy)
@@ -370,7 +431,7 @@ describe LabManager do
     let(:organization) { @config["organization"] }
     let(:workspace) { @config["workspace"] }
     let(:configuration) { @config["configuration"] }
-    
+
     it "lists machines", :integration => true do
       lab = LabManager.new("POS")
       lab.workspace = workspace
@@ -382,7 +443,7 @@ describe LabManager do
       machines.each { |machine|
         machine.name.size().should > 0
         machine.internal_ip.should match /\d+\.\d+\.\d+\.\d+/
-        machine.external_ip.should match /\d+\.\d+\.\d+\.\d+/
+          machine.external_ip.should match /\d+\.\d+\.\d+\.\d+/
       }
     end
 

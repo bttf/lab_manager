@@ -7,6 +7,7 @@ require 'xsd/datatypes'
 require 'yaml'
 
 require 'lab_manager/machine'
+require 'lab_manager/configuration'
 
 require 'lab_manager/httpclient_patch'
 
@@ -96,10 +97,11 @@ class LabManager
   #
   def configuration(name_or_id)
     if name_or_id =~ /^\d+$/
-      proxy.GetConfiguration(:configurationId => name_or_id)
+      config_data = proxy.GetConfiguration(:configurationId => name_or_id)
     else
-      proxy.GetConfigurationByName(:name => name_or_id)
+      config_data = proxy.GetConfigurationByName(:name => name_or_id)
     end
+    Configuration.parse(config_data)
   end
 
   # Retrieve a list of configuration information
@@ -213,6 +215,18 @@ class LabManager
     data["ConfigurationCloneResult"]
   end
 
+  # Undeploys a configuration
+  # 
+  # ==== XML Sample
+  #
+  # * configuration_name to undeploy
+  #
+  def undeploy(configuration_name)
+    configurationId = configurationId(configuration_name)
+    
+    proxy.ConfigurationUndeploy(:configurationId => configurationId)
+  end
+
   # Delete a configuration
   #
   # ==== XML Sample
@@ -228,9 +242,13 @@ class LabManager
   # raises SOAP:FaultError. See e.faulstring or e.detail
   #
   def delete(configuration_name)
-    configurationId = configurationId(configuration_name)
+    config = configuration configuration_name
 
-    proxy.ConfigurationDelete(:configurationId => configurationId)
+    if (config.deployed)
+      undeploy configuration_name
+    end
+
+    proxy.ConfigurationDelete(:configurationId => config.id)
   end
 
   private
