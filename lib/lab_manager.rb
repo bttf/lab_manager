@@ -143,9 +143,9 @@ class LabManager
   #   lab_manager.machines("CONFIG NAME", :exclude => ["machine name"])
   #
   def machines(configuration_name, options = {})
-    configurationId = configurationId(configuration_name)
+    config = configuration(configuration_name)
 
-    data = proxy.ListMachines(:configurationId => configurationId)
+    data = proxy.ListMachines(:configurationId => config.id)
 
     machines = Machine.from_list(data)
 
@@ -180,10 +180,10 @@ class LabManager
   # return the new configuration id
   #
   def checkout(configuration_name, new_configuration_name)
-    configurationId = configurationId(configuration_name)
+    config = configuration(configuration_name)
 
     data = proxy.ConfigurationCheckout(
-              :configurationId => configurationId,
+              :configurationId => config.id,
               :workspaceName => new_configuration_name)
     data["ConfigurationCheckoutResult"]
   end
@@ -207,10 +207,10 @@ class LabManager
   # returns the id of the cloned configuration.
   #
   def clone(configuration_name, new_configuration_name)
-    configurationId = configurationId(configuration_name)
+    config = configuration(configuration_name)
 
     data = proxy.ConfigurationClone(
-              :configurationId => configurationId, 
+              :configurationId => config.id, 
               :newWorkspaceName => new_configuration_name)
     data["ConfigurationCloneResult"]
   end
@@ -222,9 +222,9 @@ class LabManager
   # * configuration_name to undeploy
   #
   def undeploy(configuration_name)
-    configurationId = configurationId(configuration_name)
+    config = configuration(configuration_name)
     
-    proxy.ConfigurationUndeploy(:configurationId => configurationId)
+    proxy.ConfigurationUndeploy(:configurationId => config.id)
   end
 
   # Delete a configuration
@@ -242,10 +242,10 @@ class LabManager
   # raises SOAP:FaultError. See e.faulstring or e.detail
   #
   def delete(configuration_name)
-    config = configuration configuration_name
+    config = configuration(configuration_name)
 
     if (config.deployed)
-      undeploy configuration_name
+      proxy.ConfigurationUndeploy(:configurationId => config.id)
     end
 
     proxy.ConfigurationDelete(:configurationId => config.id)
@@ -254,11 +254,6 @@ class LabManager
   private
   def self.config
     YAML::load_file(@@configPath)
-  end
-
-  def configurationId(configuration_name)
-    configuration = proxy.GetConfigurationByName(:name => configuration_name)
-    configuration["GetConfigurationByNameResult"]["Configuration"]["id"]
   end
 
   def proxy

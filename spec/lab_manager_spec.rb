@@ -374,7 +374,7 @@ describe LabManager do
       context "deployed" do
         let(:mock_lab) {
           mock_proxy = flexmock("proxy")
-          mock_proxy.should_receive(:GetConfigurationByName).twice.and_return(configuration_data)
+          mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
           mock_proxy.should_receive(:ConfigurationUndeploy).once.and_return(nil)
           mock_proxy.should_receive(:ConfigurationDelete).once.and_return(nil)
 
