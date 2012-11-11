@@ -7,6 +7,8 @@ describe LabManager do
 
   before do
     LabManager.reset
+
+    LabManager.DEBUG = true
   end
 
   context "configuration" do
@@ -245,6 +247,39 @@ describe LabManager do
           mockLab.machines("some cofn").should == []
         end
       end
+    end
+  end
+
+  #
+  # Integration tests. Add --tag integration to rspec run
+  #
+  # To inject your environments specifics use file based configuration in ~/.lab_manager
+  #
+  # The LabManager class uses the url, username and password values.
+  # The LabManagerSpec class uses the organization, workspace and configuration values.
+  #
+  context "integrated" do
+    before do
+      @config = LabManager.send :config
+    end
+    let(:organization) { @config["organization"] }
+    let(:workspace) { @config["workspace"] }
+    let(:configuration) { @config["configuration"] }
+    
+    it "lists machines", :integration => true do
+
+      lab = LabManager.new("POS")
+      lab.workspace = workspace
+
+      machines = lab.machines(configuration)
+
+      machines.size().should > 0
+
+      machines.each { |machine|
+        machine.name.size().should > 0
+        machine.internal_ip.should match /\d+\.\d+\.\d+\.\d+/
+        machine.external_ip.should match /\d+\.\d+\.\d+\.\d+/
+      }
     end
   end
 end

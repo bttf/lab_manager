@@ -19,7 +19,7 @@ require 'lab_manager/httpclient_patch'
 #
 class LabManager
 
-  @@DEBUG = true
+  @@DEBUG = false
 
   def self.DEBUG=(value)
     @@DEBUG = value
@@ -158,12 +158,18 @@ class LabManager
   end
 
   private
+  def self.config
+    YAML::load_file(@@configPath)
+  end
+
   def proxy
     factory = SOAP::WSDLDriverFactory.new("#{@@url}?WSDL")
     proxy = factory.create_rpc_driver
     proxy.wiredump_dev = STDOUT if @@DEBUG
     proxy.generate_explicit_type = false  # No datatype with request
     proxy.headerhandler << LabManagerHeader.new(@organization, @workspace, @@username, @@password)
+
+    proxy.streamhandler.client.receive_timeout = 100
 
     #proxy.streamhandler.client.ssl_config.verify_mode = false
 
@@ -172,10 +178,10 @@ class LabManager
 
   def load_config(url, username, password)
     if File.exists? @@configPath
-      config = YAML::load_file(@@configPath)
-      @@url = config["url"]
-      @@username = config["username"]
-      @@password = config["password"]
+      configData = LabManager.config
+      @@url = configData["url"]
+      @@username = configData["username"]
+      @@password = configData["password"]
     end
     
     @@url = url if !url.nil?
