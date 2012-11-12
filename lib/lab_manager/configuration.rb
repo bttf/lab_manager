@@ -9,7 +9,7 @@ class Configuration
     if !data.__xmlele.empty?
       
       if data.__xmlele[0].first.name != "Configuration"
-        data = data[0]
+        data = data.__xmlele[0][1]
       end
 
       data_config = data["Configuration"]

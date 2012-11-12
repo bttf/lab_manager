@@ -26,10 +26,12 @@ describe Configuration do
         }
       }
 
+      config = [[OpenStruct.new(:name => "SOME_ROOT_ELEMENT"), data.values[0]]]
+
       mock_response = flexmock("config")
       mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
       mock_response.should_receive(:[]).and_return(data.values[0])
-      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "SOME_ROOT_ELEMENT")]])
+      mock_response.should_receive(:__xmlele).and_return(config)
       
       mock_response
     }
@@ -51,10 +53,12 @@ describe Configuration do
         }
       }
 
+      config = [[OpenStruct.new(:name => "Configuration"), data.values[0]]]
+
       mock_response = flexmock("config")
       mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
       mock_response.should_receive(:[]).and_return(data.values[0])
-      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "Configuration")]])
+      mock_response.should_receive(:__xmlele).and_return(config)
       
       mock_response
     }
@@ -68,10 +72,12 @@ describe Configuration do
         }
       }
 
+      config = [[OpenStruct.new(:name => "SOME_ROOT_ELEMENT"), data.values[0]]]
+
       mock_response = flexmock("config")
       mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
       mock_response.should_receive(:[]).and_return(data.values[0])
-      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "SOME_ROOT_ELEMENT")]])
+      mock_response.should_receive(:__xmlele).and_return(config)
       
       mock_response
     }
