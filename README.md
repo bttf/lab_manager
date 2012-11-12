@@ -97,6 +97,7 @@ Machine.to_csv(machines)
 
 Release Notes
 =============
+* 1.0.9 - Fix bug that resulted from inaccurate mock data.
 * 1.0.8 - Add clone, delete and checkout support.
 * 1.0.7 - Add bin/lab_machines.sh to allow for command line interaction with Lab Manager.
 * 1.0.6 - Fix problem with loading configurations with a single machine in it.

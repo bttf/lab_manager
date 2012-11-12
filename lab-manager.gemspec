@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'lab-manager'
-  s.version     = '1.0.8'
+  s.version     = '1.0.9'
   s.date        = '2012-11-05'
   s.summary     = "Client for VMWare Lab Manager"
   s.description = "Access information about your Lab Manager configurations."
