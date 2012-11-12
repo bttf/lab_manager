@@ -1,17 +1,23 @@
+require 'flexmock'
+
 class Configuration
 
   def self.parse(data)
 
-    if !data.keys.empty? && data.keys.first != "Configuration"
-      data = data.values[0]
-    end
-
     configuration = Configuration.new
-    data_config = data["Configuration"]
-    if data_config
-      configuration.id = data_config["id"]
-      configuration.name = data_config["name"]
-      configuration.deployed = data_config["isDeployed"] == "true" ? true : false
+
+    if !data.__xmlele.empty?
+      
+      if data.__xmlele[0].first.name != "Configuration"
+        data = data[0]
+      end
+
+      data_config = data["Configuration"]
+      if data_config
+        configuration.id = data_config["id"]
+        configuration.name = data_config["name"]
+        configuration.deployed = data_config["isDeployed"] == "true" ? true : false
+      end
     end
 
     configuration

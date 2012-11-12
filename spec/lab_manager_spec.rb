@@ -105,7 +105,7 @@ describe LabManager do
     end
 
     let(:configuration_data) {
-      {
+      data = {
         "GetConfigurationByNameResult" =>  {
           "Configuration" => { 
             "id" => "configurationId",
@@ -122,6 +122,13 @@ describe LabManager do
           }
         }
       }
+
+      mock_response = flexmock("config")
+      mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
+      mock_response.should_receive(:[]).and_return(data.values[0])
+      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "SOME_ROOT_ELEMENT")]])
+                                      
+      mock_response
     }
 
     let(:lab) { LabManager.new("SOME ORG", "username", "password") }
@@ -138,7 +145,7 @@ describe LabManager do
       }
 
       it "with a configuration name" do
-        config = mock_lab.configuration("CONFIG NAME")
+        config = mock_lab.configuration(configuration_data)
 
         config.should_not be_nil
         config.id.should == "configurationId"

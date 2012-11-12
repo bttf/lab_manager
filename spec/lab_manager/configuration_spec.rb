@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'flexmock'
+require 'ostruct'
 
 require 'lab_manager/configuration'
 
@@ -7,7 +8,7 @@ describe Configuration do
 
   context "valid xm" do
     let(:deployed_config_data) {
-      {
+      data = {
         "GetConfigurationByNameResult" =>  {
           "Configuration" => { 
             "id" => "12345",
@@ -24,16 +25,55 @@ describe Configuration do
           }
         }
       }
+
+      mock_response = flexmock("config")
+      mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
+      mock_response.should_receive(:[]).and_return(data.values[0])
+      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "SOME_ROOT_ELEMENT")]])
+      
+      mock_response
+    }
+
+    let(:deployed_config_data_as_root) {
+      data = {
+        "Configuration" => { 
+          "id" => "12345",
+          "name" => "a_config",
+          "isDeployed" => "true",
+          "isPublic" => "true",
+          "description" => "A Nice configuration",
+          "fenceMode" => "true",
+          "mustBeFenced" => "NotSpecified",
+          "type" => "2",
+          "dateCreated" => "2012-11-07T14:24:29.01",
+          "autoDeleteInMilliSeconds" => "0",
+          "autoDeleteDateTime" => "9999-12-31T23:59:59.9999999",
+        }
+      }
+
+      mock_response = flexmock("config")
+      mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
+      mock_response.should_receive(:[]).and_return(data.values[0])
+      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "Configuration")]])
+      
+      mock_response
     }
 
     let(:undeployed_config_data) {
-      {
+      data = {
         "GetConfigurationByNameResult" =>  {
           "Configuration" => { 
             "isDeployed" => "false",
           }
         }
       }
+
+      mock_response = flexmock("config")
+      mock_response.should_receive(:keys).and_throw "METHOD NOT FOUND"
+      mock_response.should_receive(:[]).and_return(data.values[0])
+      mock_response.should_receive(:__xmlele).and_return([[OpenStruct.new(:name => "SOME_ROOT_ELEMENT")]])
+      
+      mock_response
     }
 
     it "parses result data" do
@@ -45,7 +85,7 @@ describe Configuration do
     end
 
     it "parses config" do
-      config = Configuration.parse(deployed_config_data["GetConfigurationByNameResult"])
+      config = Configuration.parse(deployed_config_data_as_root)
 
       config.id.should == "12345"
       config.name.should == "a_config"
@@ -59,7 +99,11 @@ describe Configuration do
     end
 
     it "returns no data i there is none" do
-      config = Configuration.parse({})
+      data = flexmock("no data")
+      data.should_receive(:__xmlele).and_return([])
+      data.should_receive(:[]).and_return([])
+
+      config = Configuration.parse(data)
 
       config.should_not be_nil
     end
