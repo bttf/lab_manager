@@ -1,5 +1,3 @@
-require 'flexmock'
-
 class Configuration
 
   def self.parse(data)
