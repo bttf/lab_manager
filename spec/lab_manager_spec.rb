@@ -369,7 +369,6 @@ describe LabManager do
       }
 
       it "reverts a configuration" do
-
         result = mock_lab.revert "some configuration"
 
         result.should be_true
@@ -505,6 +504,14 @@ describe LabManager do
       lab.delete("#{configuration}_new")
 
       result.should be_true
+    end
+
+    it "revert a configuration", :integration => true do
+
+      lab = LabManager.new("POS")
+      lab.workspace = workspace
+
+      lab.revert "#{configuration}_new"
     end
   end
 end
