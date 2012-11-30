@@ -356,6 +356,26 @@ describe LabManager do
       end
     end
 
+    context "revert" do
+      let(:mock_lab) {
+        mock_proxy = flexmock("proxy")
+        mock_proxy.should_receive(:GetConfigurationByName).once.and_return(configuration_data)
+        mock_proxy.should_receive(:ConfigurationPerformAction).once.and_return(nil)
+
+        mock_lab = flexmock(lab)
+        mock_lab.should_receive(:proxy).and_return(mock_proxy)
+
+        mock_lab
+      }
+
+      it "reverts a configuration" do
+
+        result = mock_lab.revert "some configuration"
+
+        result.should be_true
+      end
+    end
+
     context "delete" do
 
       context "undeployed" do

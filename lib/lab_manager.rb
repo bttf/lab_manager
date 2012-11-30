@@ -257,6 +257,22 @@ class LabManager
     proxy.ConfigurationDelete(:configurationId => config.id)
   end
 
+  # Revert a configuratoin to its original state
+  #
+  # ==== XML Sample
+  #
+  #  <ConfigurationPerformAction xmlns="http://vmware.com/labmanager">
+  #     <configurationId>int</configurationId>
+  #     <action>int</action>
+  #  </ConfigurationPerformAction>
+  def revert(configuration_name)
+    config = configuration(configuration_name)
+
+    proxy.ConfigurationPerformAction(:configurationId => config.id, :action => 7)
+
+    true
+  end
+
   private
   def self.config
     YAML::load_file(@@configPath)
